@@ -1,0 +1,153 @@
+FROM ubuntu:18.04
+
+    ENV DEBIAN_FRONTEND=noninteractive
+    ENV HDF5_USE_FILE_LOCKING=FALSE
+
+    # Install common dependencies
+    RUN apt-get update \
+      && apt-get --yes install --no-install-recommends \
+      bison \
+      build-essential \
+      cmake \
+      flex \
+      g++ \
+      gcc \
+      gettext-base \
+      gfortran \
+      git \
+      libarmadillo-dev \
+      libblas-dev \
+      libboost-date-time-dev \
+      libboost-dev \
+      libboost-filesystem-dev \
+      libboost-numpy-dev \
+      libboost-program-options-dev \
+      libboost-python-dev \
+      libboost-regex-dev \
+      libboost-signals-dev \
+      libboost-system-dev \
+      libboost-thread-dev \
+      libcfitsio-dev \
+      libfftw3-dev \
+      libgsl-dev \
+      libgtkmm-3.0-dev \
+      libhdf5-serial-dev \
+      liblapacke-dev \
+      liblog4cplus-1.1-9 \
+      liblog4cplus-dev \
+      libncurses5-dev \
+      libpng-dev \
+      libpython2.7-dev \
+      libreadline-dev \
+      libxml2-dev \
+      openssh-server \
+      python \
+      python-pip \
+      python3-pip \
+      python-tk \
+      python-setuptools \
+      subversion \
+      vim \
+      wcslib-dev \
+      wget \
+      && rm -rf /var/lib/apt/lists/*
+
+    # Install python3 packages
+    RUN pip3 install setuptools
+    RUN pip3 install numpy xmlrunner
+    
+    # Install python2 packages
+    RUN pip install numpy
+
+    # Install casacore data
+    RUN mkdir -p /opt/lofarsoft/data \
+    && cd /opt/lofarsoft/data \
+    && wget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar \
+    && tar xvf WSRT_Measures.ztar \
+    && rm WSRT_Measures.ztar
+    
+    # Install casacore
+    RUN cd / && wget https://github.com/casacore/casacore/archive/v3.1.0.tar.gz \
+    && tar xvf v3.1.0.tar.gz && cd casacore-3.1.0 \
+    && mkdir build && cd build \
+    && cmake -DBUILD_PYTHON=True \
+        -DDATA_DIR=/opt/lofarsoft/data \
+        -DUSE_OPENMP=ON -DUSE_THREADS=OFF -DUSE_FFTW3=TRUE \
+        -DUSE_HDF5=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON3=True \
+        -DCMAKE_CXX_FLAGS="-fsigned-char -O2 -DNDEBUG" ../ \
+    && make -j8 && make install && cd / && rm -rf v3.1.0.tar.gz casacore-3.1.0
+    
+    # Install casarest
+    RUN cd / && wget https://github.com/casacore/casarest/archive/1.5.0.tar.gz \
+    && tar xvf 1.5.0.tar.gz && cd casarest-1.5.0 && mkdir build && cd build \
+    && cmake ../ \
+    && make -j8 && make install && cd / && rm -rf casarest-1.5.0 1.5.0.tar.gz
+
+    # Install python casacore for python3
+    RUN wget https://github.com/casacore/python-casacore/archive/v3.0.0.tar.gz \
+    && tar xvf v3.0.0.tar.gz && cd python-casacore-3.0.0 \
+    && python3 setup.py install 
+    
+    # Install aoflagger
+    RUN wget https://sourceforge.net/projects/aoflagger/files/latest/download \
+    && mv download download.tar && tar xvf download.tar \
+    && cd aoflagger-2.14.0 && mkdir build && cd build \
+    && cmake ../ \
+    && make -j8 && make install && cd / && rm -rf aoflagger-2.14.0
+    
+    # Install pyBDSF
+    RUN wget https://github.com/lofar-astron/PyBDSF/archive/v1.9.0.tar.gz \
+    && tar xvf v1.9.0.tar.gz && cd PyBDSF-1.9.0 \
+    && python3 setup.py install && cd / && rm -rf v1.9.0.tar.gz PyBDSF-1.9.0
+    
+    # Install the LOFAR Beam Library
+    RUN git clone https://github.com/lofar-astron/LOFARBeam.git \
+    && cd LOFARBeam \
+    && git checkout ad5d086b30523cc3891a9d4baa38f65431358701 \
+    && mkdir build && cd build && cmake ../ && make && make install \
+    && cd / && rm -rf LOFARBeam
+    
+    # Install DP3
+    RUN git clone https://github.com/lofar-astron/DP3.git \
+    && cd DP3 && git checkout 016e5e58f25d16443c51e44cfa5b432d4969f975 \
+    && mkdir build && cd build && cmake ../ && make -j8 && make install \
+    && cd / && rm -rf DP3 
+    
+    # Install wsclean
+    RUN cd / && git clone https://git.code.sf.net/p/wsclean/code wsclean-code \
+    && cd wsclean-code/wsclean && mkdir build && cd build \
+    && cmake ../ && make && make install && cd / && rm -rf wsclean-code
+    
+    # Install dysco
+    RUN cd / && wget https://github.com/aroffringa/dysco/archive/v1.2.tar.gz \
+    && tar xvf v1.2.tar.gz && cd dysco-1.2 && mkdir build && cd build \
+    && cmake ../ && make && make install && cd / && rm -rf v1.2.tar.gz dysco-1.2
+    
+    # Install LSMTool - THE SED COMMANDS ARE NEEDED FOR PYTHON3 FIX
+    RUN cd / && wget https://github.com/darafferty/LSMTool/archive/v1.4.0.tar.gz \
+    && tar xvf v1.4.0.tar.gz && cd LSMTool-1.4.0 \
+    && sed '41d' setup.py > setup.py.new \
+    && sed '9,13d' setup.py.new > setup.py \
+    && python3 setup.py install && cd / && rm -rf LSMTool-1.4.0 v1.4.0.tar.gz
+    
+    # Install RMextract
+    RUN cd / && git clone https://github.com/lofar-astron/RMextract.git \
+    && cd RMextract && git checkout v0.4 \
+    && python3 setup.py install && cd / && rm -rf RMextract 
+    
+    # Install losoto
+    RUN cd / && git clone https://github.com/revoltek/losoto.git \
+    && cd losoto && git checkout 863cf69d02c8bbb5ba6397853e0233491e0fb55f \
+    && python3 setup.py install && cd / && rm -rf losoto
+    
+    # Install LOFAR 4 from trunk
+    RUN cd / \
+    && svn --non-interactive -q co \
+      https://svn.astron.nl/LOFAR/branches/LOFAR-Release-4_0/ source \
+    && cd / && mkdir -p source/build/gnucxx11_optarch \
+    && cd source/build/gnucxx11_optarch \
+    && cmake -DBUILD_PACKAGES="MS ParmDB pyparmdb Pipeline LofarStMan" \
+      -DBUILD_TESTING=OFF -DUSE_OPENMP=True ../../ \
+    && make -j8 && make install && cd ../../../ && rm -rf source
+    
+    
