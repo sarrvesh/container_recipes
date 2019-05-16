@@ -25,6 +25,7 @@ FROM ubuntu:18.04
     libboost-regex-dev \
     libboost-signals-dev \
     libboost-system-dev \
+    libboost-test-dev \
     libboost-thread-dev \
     libcfitsio-dev \
     libfftw3-dev \
