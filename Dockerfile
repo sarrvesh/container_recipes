@@ -140,7 +140,7 @@ FROM ubuntu:18.04
     && cd source && mkdir -p build/gnucxx11_optarch \
     && cd build/gnucxx11_optarch \
     && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-    && cmake -DBUILD_PACKAGES="MS pystationresponse ParmDB pyparmdb Pipeline" -DBUILD_TESTING=OFF \
+    && cmake -DBUILD_PACKAGES="MS ParmDB pyparmdb Pipeline" -DBUILD_TESTING=OFF \
           -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
           -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
           -DUSE_OPENMP=True ../../ \
@@ -169,12 +169,12 @@ FROM ubuntu:18.04
      && cd ../ && rm -rf RMextract
     
    # Install wsclean
-   RUN wget https://sourceforge.net/projects/wsclean/files/wsclean-2.6/wsclean-2.6.tar.bz2/download \
+   RUN wget https://sourceforge.net/projects/wsclean/files/wsclean-2.7/wsclean-2.7.tar.bz2/download \
      && mv download download.tar && tar xvf download.tar \
-     && cd wsclean-2.6 && mkdir build && cd build \
+     && cd wsclean-2.7 && mkdir build && cd build \
      && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
               -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
-     && make -j4 && make install && cd ../../ && rm -rf wsclean download.tar
+     && make -j4 && make install && cd ../../ && rm -rf wsclean-2.7 download.tar
 
    # Install losoto
    RUN git clone https://github.com/revoltek/losoto.git \
