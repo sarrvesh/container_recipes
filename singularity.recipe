@@ -175,7 +175,7 @@ From: ubuntu:18.04
    # Install wsclean
    wget https://sourceforge.net/projects/wsclean/files/latest/download \
      && mv download download.tar && tar xvf download.tar \
-     && cd wsclean-2.6 && mkdir build && cd build \
+     && cd wsclean-2.7 && mkdir build && cd build \
      && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
               -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
      && make -j4 && make install && cd ../../ && rm -rf wsclean download.tar

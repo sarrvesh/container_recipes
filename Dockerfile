@@ -169,7 +169,7 @@ FROM ubuntu:18.04
      && cd ../ && rm -rf RMextract
     
    # Install wsclean
-   RUN wget https://sourceforge.net/projects/wsclean/files/latest/download \
+   RUN wget https://sourceforge.net/projects/wsclean/files/wsclean-2.6/wsclean-2.6.tar.bz2/download \
      && mv download download.tar && tar xvf download.tar \
      && cd wsclean-2.6 && mkdir build && cd build \
      && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
