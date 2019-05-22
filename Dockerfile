@@ -20,6 +20,7 @@ FROM ubuntu:18.04
     libboost-date-time-dev \
     libboost-dev \
     libboost-filesystem-dev \
+    libboost-numpy-dev \
     libboost-program-options-dev \
     libboost-python-dev \
     libboost-regex-dev \
@@ -45,6 +46,7 @@ FROM ubuntu:18.04
     python-numpy \
     python-pip \
     python-setuptools \
+    python-tk \
     subversion \
     vim \
     wcslib-dev \
