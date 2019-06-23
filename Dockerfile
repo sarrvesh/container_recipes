@@ -3,184 +3,182 @@ FROM ubuntu:18.04
     ENV DEBIAN_FRONTEND=noninteractive
     ENV HDF5_USE_FILE_LOCKING=FALSE
 
-   # Install common dependencies
-   RUN apt-get update \
-    && apt-get --yes install --no-install-recommends \
-    bison \
-    build-essential \
-    cmake \
-    flex \
-    g++ \
-    gcc \
-    gettext-base \
-    gfortran \
-    git \
-    libarmadillo-dev \
-    libblas-dev \
-    libboost-date-time-dev \
-    libboost-dev \
-    libboost-filesystem-dev \
-    libboost-numpy-dev \
-    libboost-program-options-dev \
-    libboost-python-dev \
-    libboost-regex-dev \
-    libboost-signals-dev \
-    libboost-system-dev \
-    libboost-test-dev \
-    libboost-thread-dev \
-    libcfitsio-dev \
-    libfftw3-dev \
-    libgsl-dev \
-    libgtkmm-3.0-dev \
-    libhdf5-serial-dev \
-    liblapacke-dev \
-    liblog4cplus-1.1-9 \
-    liblog4cplus-dev \
-    libncurses5-dev \
-    libpng-dev \
-    libpython2.7-dev \
-    libreadline-dev \
-    libxml2-dev \
-    openssh-server \
-    python \
-    python-numpy \
-    python-pip \
-    python-setuptools \
-    python-tk \
-    subversion \
-    vim \
-    wcslib-dev \
-    wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install \
-    scipy \
-    aplpy \
-    astropy==2.0.4 \
-    matplotlib==2.2.3 \
-    pyvo \
-    PySocks \
-    python-monetdb \
-    wcsaxes \
-    xmlrunner
+    # Install common dependencies
+    RUN apt-get update \
+      && apt-get --yes install --no-install-recommends \
+      bison \
+      build-essential \
+      cmake \
+      flex \
+      g++ \
+      gcc \
+      gettext-base \
+      gfortran \
+      git \
+      libarmadillo-dev \
+      libblas-dev \
+      libboost-date-time-dev \
+      libboost-dev \
+      libboost-filesystem-dev \
+      libboost-numpy-dev \
+      libboost-program-options-dev \
+      libboost-python-dev \
+      libboost-regex-dev \
+      libboost-signals-dev \
+      libboost-system-dev \
+      libboost-thread-dev \
+      libboost-test-dev \
+      libcfitsio-dev \
+      libfftw3-dev \
+      libgsl-dev \
+      libgtkmm-3.0-dev \
+      libhdf5-serial-dev \
+      liblapacke-dev \
+      liblog4cplus-1.1-9 \
+      liblog4cplus-dev \
+      libncurses5-dev \
+      libpng-dev \
+      libpython2.7-dev \
+      libreadline-dev \
+      libxml2-dev \
+      openssh-server \
+      python \
+      python-pip \
+      python3-pip \
+      python-tk \
+      python-setuptools \
+      subversion \
+      vim \
+      wcslib-dev \
+      wget \
+      && rm -rf /var/lib/apt/lists/*
 
-   RUN pip install --upgrade numpy 
-   
-   # Install casacore data
-   RUN mkdir -p /opt/lofarsoft/data \
+    # Install python3 packages
+    RUN pip3 install setuptools
+    RUN pip3 install numpy xmlrunner
+    
+    # Install python2 packages
+    RUN pip install numpy
+
+    # Install casacore data
+    RUN mkdir -p /opt/lofarsoft/data \
     && cd /opt/lofarsoft/data \
     && wget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar \
     && tar xvf WSRT_Measures.ztar \
-    && rm WSRT_Measures.ztar 
-   
-   # Install casacore
-   RUN wget https://github.com/casacore/casacore/archive/v2.4.1.tar.gz \
-    && tar xvf v2.4.1.tar.gz && cd casacore-2.4.1 && mkdir build \
-    && cd build \
-    && cmake -DBUILD_PYTHON=True \
-         -DDATA_DIR=/opt/lofarsoft/data \
-         -DUSE_OPENMP=ON -DUSE_THREADS=OFF -DUSE_FFTW3=TRUE \
-         -DUSE_HDF5=ON -DCXX11=ON -DCMAKE_BUILD_TYPE=Release \
-         -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-         -DCMAKE_CXX_FLAGS="-fsigned-char -O2 -DNDEBUG -march=native" ../ \
-    && make -j4 && make install \
-    && cd ../../ && rm -rf casacore-2.4.1 v2.4.1.tar.gz
+    && rm WSRT_Measures.ztar
     
-   # Install casarest
-   RUN git clone https://github.com/casacore/casarest.git \
-    && cd casarest \
-    && git checkout 2350d906194979d70448bf869bf628c24a0e4c19 \
-    && mkdir build \
-    && cd build \
+    # Install casacore
+    RUN cd / && wget https://github.com/casacore/casacore/archive/v3.1.0.tar.gz \
+    && tar xvf v3.1.0.tar.gz && cd casacore-3.1.0 \
+    && mkdir build && cd build \
+    && cmake -DBUILD_PYTHON=True \
+        -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
+        -DDATA_DIR=/opt/lofarsoft/data \
+        -DUSE_OPENMP=ON -DUSE_THREADS=OFF -DUSE_FFTW3=TRUE \
+        -DUSE_HDF5=ON -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON3=True \
+        -DCMAKE_CXX_FLAGS="-fsigned-char -O2 -DNDEBUG" ../ \
+    && make -j8 && make install && cd / && rm -rf v3.1.0.tar.gz casacore-3.1.0
+    
+    # Install casarest
+    RUN cd / && wget https://github.com/casacore/casarest/archive/1.5.0.tar.gz \
+    && tar xvf 1.5.0.tar.gz && cd casarest-1.5.0 && mkdir build && cd build \
     && cmake -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-             -DCMAKE_PREFIX_PATH=/opt/lofarsoft ../ \
-    && make -j4 && make install \
-    && cd ../../ && rm -rf casarest
-   
-   # Install python casacore
-   RUN wget https://github.com/casacore/python-casacore/archive/v3.0.0.tar.gz \
+             -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ ../ \
+    && make -j8 && make install && cd / && rm -rf casarest-1.5.0 1.5.0.tar.gz
+
+    # Install python casacore for python3
+    RUN wget https://github.com/casacore/python-casacore/archive/v3.0.0.tar.gz \
+    && mkdir -p /opt/lofarsoft//lib/python3.6/site-packages/ \
     && tar xvf v3.0.0.tar.gz && cd python-casacore-3.0.0 \
-    && python setup.py build_ext -I/opt/lofarsoft/include -L/opt/lofarsoft/lib/ \
-    && mkdir -p /opt/lofarsoft/lib/python2.7/site-packages/ \
-    && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-    && python setup.py install --prefix=/opt/lofarsoft
-   
-   # Install AOFlagger
-   RUN wget https://sourceforge.net/projects/aoflagger/files/latest/download \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python3.6/site-packages/ \
+    && python3 setup.py build_ext -I/opt/lofarsoft/include -L/opt/lofarsoft/lib \
+    && python3 setup.py install --prefix=/opt/lofarsoft/ \
+    && cd / && rm -rf python-casacore-3.0.0 v3.0.0.tar.gz
+    
+    # Install aoflagger
+    RUN wget https://sourceforge.net/projects/aoflagger/files/latest/download \
     && mv download download.tar && tar xvf download.tar \
     && cd aoflagger-2.14.0 && mkdir build && cd build \
-    && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-                 -DCMAKE_PREFIX_PATH=/opt/lofarsoft \
-    && make -j4 && make install && cd ../../ \
-    && rm -rf download.tar aoflagger-2.14.0
-   
-   # Install pyBDSF
-   RUN git clone https://github.com/lofar-astron/PyBDSF.git \
-    && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-    && cd PyBDSF && python setup.py install --prefix=/opt/lofarsoft \
-    && cd ../ && rm -rf PyBDSF
+    && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft/ \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ \
+    && make -j8 && make install && cd / && rm -rf aoflagger-2.14.0
     
-   # Install the LOFAR beam library
-   RUN git clone https://github.com/lofar-astron/LOFARBeam.git \
-    && cd LOFARBeam && mkdir build && cd build \
-    && cmake -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-             -DCMAKE_PREFIX_PATH=/opt/lofarsoft ../ \
-    && make && make install \
-    && cd ../../ && rm -rf LOFARBeam 
-   
-   # Install DP3
-   RUN git clone https://github.com/lofar-astron/DP3.git \
+    # Install pyBDSF
+    RUN wget https://github.com/lofar-astron/PyBDSF/archive/v1.9.0.tar.gz \
+    && tar xvf v1.9.0.tar.gz && cd PyBDSF-1.9.0 \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python3.6/site-packages/ \
+    && python3 setup.py install --prefix=/opt/lofarsoft/ \
+    && cd / && rm -rf v1.9.0.tar.gz PyBDSF-1.9.0
+    
+    # Install the LOFAR Beam Library
+    RUN git clone https://github.com/lofar-astron/LOFARBeam.git \
+    && cd LOFARBeam \
+    && mkdir build && cd build \
+    && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft/ \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ ../ \
+    && make && make install && cd / && rm -rf LOFARBeam
+    
+    # Install IDG
+    RUN cd / && git clone https://gitlab.com/astron-idg/idg.git \
+    && cd idg && mkdir build && cd build \
+    && cmake -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ ../ \
+    && make && make install && cd / && rm -rf idg
+    
+    # Install DP3
+    RUN git clone https://github.com/lofar-astron/DP3.git \
     && cd DP3 && mkdir build && cd build \
-    && cmake -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-             -DCMAKE_PREFIX_PATH=/opt/lofarsoft ../ \
-    && make && make install \
-    && ln -s /opt/lofarsoft/bin/DPPP /opt/lofarsoft/bin/NDPPP \
-    && cd ../../ && rm -rf DP3
-   
-   # Install LOFAR 3.2.10
-   RUN svn --non-interactive -q co \
-      https://svn.astron.nl/LOFAR/tags/LOFAR-Release-3_2_10/ source \
-    && cd source && mkdir -p build/gnucxx11_optarch \
-    && cd build/gnucxx11_optarch \
-    && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-    && cmake -DBUILD_PACKAGES="MS ParmDB pyparmdb Pipeline" -DBUILD_TESTING=OFF \
-          -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-          -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
-          -DUSE_OPENMP=True ../../ \
-    && make -j4 && make install && cd ../../../ && rm -rf source
+    && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft/ \
+             -DIDGAPI_LIBRARIES=/opt/lofarsoft/lib/libidg-api.so \
+             -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ ../ \
+    && make -j8 && make install \
+    && cd / && rm -rf DP3 
+    
+    # Install wsclean
+    RUN cd / && wget https://sourceforge.net/projects/wsclean/files/wsclean-2.7/wsclean-2.7.tar.bz2/download \
+    && mv download download.tar && tar xvf download.tar \
+    && cd wsclean-2.7 && mkdir build && cd build \
+    && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft \
+             -DIDGAPI_LIBRARIES=/opt/lofarsoft/lib/libidg-api.so \
+             -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include \
+             -DCMAKE_PREFIX_PATH=/opt/lofarsoft \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ \
+    && make -j4 && make install && cd / && rm -rf download.tar wsclean-2.7
     
     # Install dysco
-    RUN wget https://github.com/aroffringa/dysco/archive/v1.2.tar.gz \
-     && tar xvf v1.2.tar.gz && cd dysco-1.2 && mkdir build && cd build \
-     && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-              -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
-     && make -j4 && make install && cd ../../ \
-     && rm -rf dysco-1.2 v1.2.tar.gz
-     
-   # Install LSMTool
-   RUN git clone https://github.com/darafferty/LSMTool.git \
-     && cd LSMTool \
-     && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-     && python setup.py install --prefix=/opt/lofarsoft/ \
-     && cd ../ && rm -rf LSMTool 
-   
-   # Install RMextract
-   RUN git clone https://github.com/lofar-astron/RMextract.git \
-     && cd RMextract \
-     && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-     && python setup.py install --prefix=/opt/lofarsoft/ --add-lofar-utils \
-     && cd ../ && rm -rf RMextract
+    RUN cd / && wget https://github.com/aroffringa/dysco/archive/v1.2.tar.gz \
+    && tar xvf v1.2.tar.gz && cd dysco-1.2 && mkdir build && cd build \
+    && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ \
+    && make && make install && cd / && rm -rf v1.2.tar.gz dysco-1.2
     
-   # Install wsclean
-   RUN wget https://sourceforge.net/projects/wsclean/files/wsclean-2.7/wsclean-2.7.tar.bz2/download \
-     && mv download download.tar && tar xvf download.tar \
-     && cd wsclean-2.7 && mkdir build && cd build \
-     && cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ \
-              -DCMAKE_PREFIX_PATH=/opt/lofarsoft/ \
-     && make -j4 && make install && cd ../../ && rm -rf wsclean-2.7 download.tar
-
-   # Install losoto
-   RUN git clone https://github.com/revoltek/losoto.git \
-     && cd losoto \
-     && export PYTHONPATH=/opt/lofarsoft/lib/python2.7/site-packages/ \
-     && python setup.py install --prefix=/opt/lofarsoft/ \
-     && cd ../ && rm -rf losoto 
+    # Install LSMTool
+    RUN cd / && wget https://github.com/darafferty/LSMTool/archive/v1.4.1.tar.gz \
+    && tar xvf v1.4.1.tar.gz && cd LSMTool-1.4.1 \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python3.6/site-packages/ \
+    && python3 setup.py install --prefix=/opt/lofarsoft/ \
+    && cd / && rm -rf LSMTool-1.4.1 v1.4.1.tar.gz
+    
+    # Install RMextract
+    RUN cd / && git clone https://github.com/lofar-astron/RMextract.git \
+    && cd RMextract && git checkout v0.4 \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python3.6/site-packages/ \
+    && python3 setup.py install --prefix=/opt/lofarsoft && cd / && rm -rf RMextract 
+    
+    # Install losoto
+    RUN cd / && git clone https://github.com/revoltek/losoto.git \
+    && cd losoto && git checkout 8d34d0b2f789d166ecc80b9d256c4df743ea5076 \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python3.6/site-packages/ \
+    && python3 setup.py install --prefix=/opt/lofarsoft/ && cd / && rm -rf losoto
+    
+    # Install LOFAR 4 from trunk
+    RUN cd / \
+    && svn --non-interactive -q co \
+      https://svn.astron.nl/LOFAR/branches/LOFAR-Release-4_0/ source 
+    RUN cd / && mkdir -p source/build/gnucxx11_optarch \
+    && cd source/build/gnucxx11_optarch \
+    && cmake -DBUILD_PACKAGES="MS ParmDB pyparmdb Pipeline LofarStMan" \
+             -DCASACORE_ROOT_DIR=/opt/lofarsoft \
+             -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft \
+             -DBUILD_TESTING=OFF -DUSE_OPENMP=True ../../ \
+    && make -j8 && make install && cd ../../../ && rm -rf source
