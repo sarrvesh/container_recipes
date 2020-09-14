@@ -109,10 +109,12 @@ FROM ubuntu:18.04
     && pip install tables==3.5.2 \
     && python setup.py install --prefix=/opt/lofarsoft/ && cd / && rm -rf losoto
     
-    # Install aoflagger
-    RUN wget https://sourceforge.net/projects/aoflagger/files/latest/download \
+    # Install aoflagger 2.14
+    # NOTE: 2.15 NEEDS PYTHON 3!!!
+    RUN wget https://sourceforge.net/projects/aoflagger/files/aoflagger-2.14.0/aoflagger-2.14.0.tar.bz2/download \
     && mv download download.tar && tar xvf download.tar \
     && cd aoflagger-2.14.0 && mkdir build && cd build \
+    && export PYTHONPATH=/opt/lofarsoft//lib/python2.7/site-packages/ \
     && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft/ \
              -DPYTHON_EXECUTABLE=/usr/bin/python \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ \
@@ -168,15 +170,16 @@ FROM ubuntu:18.04
     && make && make install \
     && cd / && rm -rf LofarStMan
     
-    # Install DP3
-    RUN git clone https://github.com/lofar-astron/DP3.git \
-    && cd DP3 && mkdir build && cd build \
+    # Install DP3 v4.1
+    # NOTE DP3 4.2 requires PYTHON 3 !!!
+    RUN cd / && wget https://github.com/lofar-astron/DP3/archive/v4.1.tar.gz \
+    && tar xvf v4.1.tar.gz && cd DP3-4.1 && mkdir build && cd build \
     && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft/ \
              -DIDGAPI_LIBRARIES=/opt/lofarsoft/lib/libidg-api.so \
              -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ ../ \
     && make -j8 && make install \
-    && cd / && rm -rf DP3 
+    && cd / && rm -rf DP3-4.1 v4.1.tar.gz 
     
     # Install wsclean
     RUN cd / && wget https://sourceforge.net/projects/wsclean/files/wsclean-2.8/wsclean-2.8.tar.bz2/download \
@@ -195,7 +198,7 @@ FROM ubuntu:18.04
       https://svn.astron.nl/LOFAR/branches/LOFAR-Release-3_2/ source 
     RUN cd / && mkdir -p source/build/gnucxx11_optarch \
     && cd source/build/gnucxx11_optarch \
-    && cmake -DBUILD_PACKAGES="Pipeline" \
+    && cmake -DBUILD_PACKAGES="Pipeline ParmDB pyparmdb" \
              -DCASACORE_ROOT_DIR=/opt/lofarsoft \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft \
              -DBUILD_TESTING=OFF -DUSE_OPENMP=True ../../ \
