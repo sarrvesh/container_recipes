@@ -179,6 +179,7 @@ FROM ubuntu:18.04
              -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft/ ../ \
     && make -j8 && make install \
+    && ln -s /opt/lofarsoft/bin/DPPP /opt/lofarsoft/bin/NDPPP \
     && cd / && rm -rf DP3-4.1 v4.1.tar.gz 
     
     # Install wsclean
