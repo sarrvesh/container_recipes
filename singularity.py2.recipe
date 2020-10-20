@@ -8,7 +8,7 @@ From: ubuntu:18.04
     export DEBIAN_FRONTEND=noninteractive
     export PYTHONPATH=/opt/lofarsoft//lib/python2.7/site-packages/
     export LD_LIBRARY_PATH=/opt/lofarsoft/lib:/usr/local/lib/
-    #. /opt/lofarsoft/lofarinit.sh
+    . /opt/lofarsoft/lofarinit.sh
     export HDF5_USE_FILE_LOCKING=FALSE
     
 %post
@@ -207,7 +207,7 @@ From: ubuntu:18.04
     cd / \
     && svn --non-interactive -q co \
       https://svn.astron.nl/LOFAR/branches/LOFAR-Release-3_2/ source 
-    RUN cd / && mkdir -p source/build/gnucxx11_optarch \
+    cd / && mkdir -p source/build/gnucxx11_optarch \
     && cd source/build/gnucxx11_optarch \
     && cmake -DBUILD_PACKAGES="Pipeline ParmDB pyparmdb" \
              -DCASACORE_ROOT_DIR=/opt/lofarsoft \
