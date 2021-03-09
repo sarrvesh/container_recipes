@@ -99,7 +99,7 @@ From: ubuntu:18.04
         -DUSE_HDF5=ON -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_PYTHON=True \
         -DCMAKE_CXX_FLAGS="-fsigned-char -O2 -DNDEBUG" ../ \
-    && make -j4 && make install && cd / && rm -rf v3.2.1.tar.gz casacore-3.2.1
+    && make -j8 && make install && cd / && rm -rf v3.2.1.tar.gz casacore-3.2.1
     
     # Install python casacore
     cd / & wget https://github.com/casacore/python-casacore/archive/v3.2.0.tar.gz \
@@ -116,7 +116,7 @@ From: ubuntu:18.04
     cd / && git clone https://github.com/revoltek/losoto.git \
     && cd losoto && git checkout pref3 \
     && export PYTHONPATH=/opt/lofarsoft//lib/python2.7/site-packages/ \
-    && pip install tables==3.5.2 \
+    && pip install tables==3.5.2 configparser\
     && python setup.py install --prefix=/opt/lofarsoft/ && cd / && rm -rf losoto
     
     # Install aoflagger 2.14
@@ -193,15 +193,15 @@ From: ubuntu:18.04
     && cd / && rm -rf DP3-4.1 v4.1.tar.gz 
     
     # Install wsclean
-    cd / && wget https://sourceforge.net/projects/wsclean/files/wsclean-2.8/wsclean-2.8.tar.bz2/download \
-    && mv download download.tar && tar xvf download.tar \
-    && cd wsclean-2.8 && mkdir build && cd build \
+    cd / && wget https://gitlab.com/aroffringa/wsclean/-/archive/v2.10/wsclean-v2.10.tar.bz2 \
+    && tar xvf wsclean-v2.10.tar.bz2 \
+    && cd wsclean-v2.10/wsclean/ && mkdir build && cd build \
     && cmake -DCASACORE_ROOT_DIR=/opt/lofarsoft \
              -DIDGAPI_LIBRARIES=/opt/lofarsoft/lib/libidg-api.so \
              -DIDGAPI_INCLUDE_DIRS=/opt/lofarsoft/include \
              -DCMAKE_PREFIX_PATH=/opt/lofarsoft \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft ../ \
-    && make -j4 && make install && cd / && rm -rf download.tar wsclean-2.8
+    && make -j8 && make install && cd / && rm -rf wsclean-v2.10.tar.bz2 wsclean-v2.10
     
     # Install LOFAR 3.2.1
     cd / \
@@ -213,7 +213,7 @@ From: ubuntu:18.04
              -DCASACORE_ROOT_DIR=/opt/lofarsoft \
              -DCMAKE_INSTALL_PREFIX=/opt/lofarsoft \
              -DBUILD_TESTING=OFF -DUSE_OPENMP=True ../../ \
-    && make -j1 && make install && cd / && rm -rf source
+    && make -j8 && make install && cd / && rm -rf source
     
     # Install factor
     cd / && git clone https://github.com/lofar-astron/factor.git \
