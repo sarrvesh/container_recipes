@@ -1,10 +1,20 @@
-FROM ubuntu:20.04
+Bootstrap: docker
+From: ubuntu:23.04
 
-    ENV DEBIAN_FRONTEND=noninteractive
-    ENV HDF5_USE_FILE_LOCKING=FALSE
+%help
+   Singularity image containing all commonly used astro software. This image is built on Ubuntu 23.04.
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export PYTHONPATH=/opt/soft/local/lib/python3.11/site-packages/
+    export LD_LIBRARY_PATH=/opt/soft/lib:/usr/local/lib/
+    export PATH=${PATH}:/opt/soft/bin
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
 
     # Install common dependencies
-    RUN apt-get update \
+    apt-get update \
     && apt-get --yes install --no-install-recommends \
         libblas-dev \
         liblapacke-dev \
@@ -32,20 +42,20 @@ FROM ubuntu:20.04
         libboost-system-dev \
         montage \
     && rm -rf /var/lib/apt/lists/*
-
+    
     # 
-    RUN mkdir /opt/soft/
+    mkdir /opt/soft/
 
     # Install python3 packages
-    RUN pip3 install -U pip
-    RUN pip3 install astroplan numpy astropy matplotlib ipython
+    pip3 install -U pip --break-system-packages
+    pip3 install astroplan numpy astropy matplotlib ipython --break-system-packages
 
     # Download NRAO CASA
     RUN pip3 install casatasks==6.5.3.28 --break-system-packages
     RUN pip3 install casadata --break-system-packages
 
     # Install Everybeam
-    RUN cd / && git clone https://git.astron.nl/RD/EveryBeam.git \
+    cd / && git clone https://git.astron.nl/RD/EveryBeam.git \
     && cd EveryBeam && git checkout v0.5.2 \
     && mkdir build && cd build \
     && export PYTHONPATH=/opt/soft/local/lib/python3.11/site-packages/ \
@@ -54,7 +64,7 @@ FROM ubuntu:20.04
     && cd / && rm -rf EveryBeam
 
     # Install IDG
-    RUN cd / && git clone https://gitlab.com/astron-idg/idg.git \
+    cd / && git clone https://gitlab.com/astron-idg/idg.git \
     && cd idg && git checkout 1.2.0 \
     && mkdir build && cd build \
     && cmake \
@@ -64,7 +74,7 @@ FROM ubuntu:20.04
     && make && make install && cd / && rm -rf idg
 
     # Install wsclean
-    RUN cd / && git clone https://gitlab.com/aroffringa/wsclean.git \
+    cd / && git clone https://gitlab.com/aroffringa/wsclean.git \
     && cd wsclean && git checkout a5b4e037d718aa1e15c79abc5e3cb0df240b3937 \
     && mkdir build && cd build \
     && export PYTHONPATH=/opt/soft/local/lib/python3.11/site-packages/ \
@@ -76,22 +86,17 @@ FROM ubuntu:20.04
     && cd / && rm -rf wsclean
 
     # Install BDSF
-    RUN pip3 install bdsf --break-system-packages
+    pip3 install bdsf --break-system-packages
     
     # Install breizorro
-    RUN pip3 install breizorro --break-system-packages
+    pip3 install breizorro --break-system-packages
 
     # Install KATbeam
-    RUN cd / && git clone https://github.com/ska-sa/katbeam.git \
+    cd / && git clone https://github.com/ska-sa/katbeam.git \
     && cd katbeam && git checkout 5ce6fcc35471168f4c4b84605cf601d57ced8d9e \
     && export PYTHONPATH=/opt/soft/local/lib/python3.11/site-packages/ \
     && python3 ./setup.py install --prefix=/opt/soft \
     && cd / && rm -rf katbeam
 
     # Install mosaic-queen
-    RUN pip3 install mosaic-queen --break-system-packages
-    
-    # Setup environment variables
-    ENV DEBIAN_FRONTEND=noninteractive
-    ENV PYTHONPATH=/opt/soft/local/lib/python3.11/site-packages/
-    ENV LD_LIBRARY_PATH=/opt/soft/lib:/usr/local/lib/
+    pip3 install mosaic-queen --break-system-packages
