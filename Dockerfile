@@ -38,7 +38,7 @@ FROM ubuntu:20.04
 
     # Install python3 packages
     RUN pip3 install -U pip
-    RUN pip3 install astroplan numpy astropy matplotlib ipython
+    RUN pip3 install -U astroplan numpy astropy matplotlib ipython
 
     # Download NRAO CASA
     RUN pip3 install casatasks==6.5.3.28
