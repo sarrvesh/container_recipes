@@ -33,9 +33,6 @@ FROM ubuntu:20.04
         montage \
     && rm -rf /var/lib/apt/lists/*
 
-    # 
-    RUN mkdir /opt/soft/
-
     # Install python3 packages
     RUN pip3 install -U pip
     RUN pip3 install -U astroplan numpy astropy matplotlib ipython
@@ -46,10 +43,9 @@ FROM ubuntu:20.04
 
     # Install Everybeam
     RUN cd / && git clone https://git.astron.nl/RD/EveryBeam.git \
-    && cd EveryBeam && git checkout v0.5.2 \
+    && cd EveryBeam && git checkout v0.5.3 \
     && mkdir build && cd build \
-    && export PYTHONPATH=/opt/soft/lib/python3.8/site-packages/ \
-    && cmake -DCMAKE_INSTALL_PREFIX=/opt/soft/ ../ \
+    && cmake ../ \
     && make -j $threads && make install \
     && cd / && rm -rf EveryBeam
 
@@ -58,20 +54,15 @@ FROM ubuntu:20.04
     && cd idg && git checkout 1.2.0 \
     && mkdir build && cd build \
     && cmake \
-      -DCMAKE_INSTALL_PREFIX=/opt/soft/ \
       -DBUILD_LIB_CUDA=Off \
       ../ \
     && make && make install && cd / && rm -rf idg
 
     # Install wsclean
     RUN cd / && git clone https://gitlab.com/aroffringa/wsclean.git \
-    && cd wsclean && git checkout a5b4e037d718aa1e15c79abc5e3cb0df240b3937 \
+    && cd wsclean && git checkout v3.4 \
     && mkdir build && cd build \
-    && export PYTHONPATH=/opt/soft/lib/python3.8/site-packages/ \
-    && cmake \
-        -DCMAKE_PREFIX_PATH=/opt/soft/ \
-        -DCASACORE_ROOT_DIR=/opt/soft/ \
-        -DCMAKE_INSTALL_PREFIX=/opt/soft/ ../ \
+    && cmake ../ \
     && make -j 4 && make install \
     && cd / && rm -rf wsclean
 
@@ -81,17 +72,8 @@ FROM ubuntu:20.04
     # Install breizorro
     RUN pip3 install breizorro
 
-    # Install KATbeam
-    RUN cd / && git clone https://github.com/ska-sa/katbeam.git \
-    && cd katbeam && git checkout 5ce6fcc35471168f4c4b84605cf601d57ced8d9e \
-    && export PYTHONPATH=/opt/soft/lib/python3.8/site-packages/ \
-    && python3 ./setup.py install --prefix=/opt/soft \
-    && cd / && rm -rf katbeam
-
     # Install mosaic-queen
     RUN pip3 install mosaic-queen
     
     # Setup environment variables
     ENV DEBIAN_FRONTEND=noninteractive
-    ENV PYTHONPATH=/opt/soft/lib/python3.8/site-packages/
-    ENV LD_LIBRARY_PATH=/opt/soft/lib:/usr/local/lib/
