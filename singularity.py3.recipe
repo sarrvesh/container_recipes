@@ -38,15 +38,26 @@ From: ubuntu:20.04
         libboost-program-options-dev \
         libboost-system-dev \
         montage \
+        libpng-dev \
+        liblua5.3-dev \
     && rm -rf /var/lib/apt/lists/*
 
     # Install python3 packages
     pip3 install -U pip
-    pip3 install -U astroplan numpy astropy matplotlib ipython
+    pip3 install -U astroplan numpy astropy matplotlib ipython RMextract jupyter
 
     # Download NRAO CASA
     pip3 install casatasks==6.5.3.28
     pip3 install casadata
+
+    # Install BDSF
+    pip3 install bdsf
+    
+    # Install breizorro
+    pip3 install breizorro
+
+    # Install mosaic-queen
+    pip3 install mosaic-queen
 
     # Install Everybeam
     cd / && git clone https://git.astron.nl/RD/EveryBeam.git \
@@ -73,11 +84,26 @@ From: ubuntu:20.04
     && make -j 4 && make install \
     && cd / && rm -rf wsclean
 
-    # Install BDSF
-    pip3 install bdsf
+    # Install AOFlagger
+    cd / && git clone https://gitlab.com/aroffringa/aoflagger.git \
+    && cd aoflagger && git checkout v3.4.0 \
+    && mkdir build && cd build \
+    && cmake ../ \
+    && make -j 4 && make install \
+    && cd / && rm -rf aoflagger
     
-    # Install breizorro
-    pip3 install breizorro
+    # Install DP3
+    cd / && git clone https://github.com/lofar-astron/DP3.git \
+    && cd DP3 && git checkout v6.0 \
+    && mkdir build && cd build \
+    && cmake ../ \
+    && make -j 4 && make install \
+    && cd / && rm -rf DP3
 
-    # Install mosaic-queen
-    pip3 install mosaic-queen
+    # Install dysco
+    cd / && git clone https://github.com/aroffringa/dysco.git \
+    && cd dysco && git checkout v1.2 \
+    && mkdir build && cd build \
+    && cmake ../ \
+    && make -j 4 && make install \
+    && cd / && rm -rf dysco
